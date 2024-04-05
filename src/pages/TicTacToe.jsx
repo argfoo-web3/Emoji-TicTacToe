@@ -94,13 +94,6 @@ const TicTacToe = () => {
     </button>
   );
 
-  const handleSendMessage = () => {
-    if (networkContext.conn.current && networkContext.conn.current.open) {
-      networkContext.conn.current.send('sending message');
-    } else {
-      alert('Connection is not open');
-    }
-  };
   // Effect to handle bot move
   /*useEffect(() => {
     handleBotMove(
@@ -155,9 +148,6 @@ const TicTacToe = () => {
               ))}
             </div>
           ))}
-        </div>
-        <div className="flex justify-center my-3">
-          <button onClick={handleSendMessage} className="btn btn-glass text-2xl text-white bg-blue-700">Send Message</button>
         </div>
         <button
           className="btn bg-red-700 text-white text-xl mt-4"

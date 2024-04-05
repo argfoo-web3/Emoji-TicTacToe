@@ -133,6 +133,18 @@ function GameMode() {
         style={customStyles}
       >
         <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>You are now connected!</h2>
+        <table style={{ borderCollapse: 'collapse', width: '100%', marginBottom: '20px' }}>
+          <tr>
+            <td className="text-black font-semibold" style={{ border: 'none', textAlign: 'center' }}>You</td>
+            <td className="text-black font-semibold" style={{ border: 'none', textAlign: 'center' }}></td>
+            <td className="text-black font-semibold" style={{ border: 'none', textAlign: 'center' }}></td>
+          </tr>
+          <tr>
+            <td className="text-black font-semibold text-3xl border-gray-200 border-b-2 flex justify-center py-3"style={{ border: 'none', textAlign: 'center' }}>{clickedEmoji1}</td>
+            <td className="text-black font-semibold" style={{ border: 'none', textAlign: 'center' }}>VS</td>
+            <td className="text-black font-semibold text-3xl border-gray-200 border-b-2 flex justify-center py-3"style={{ border: 'none', textAlign: 'center' }}>{opponentEmoji}</td>
+          </tr>
+        </table>
         <button className="btn btn-glass mx-3 text-2xl w-40 text-white bg-blue-700" onClick={handleClick1}>Start Game</button>
       </Modal>
       <div className="bg-white w-full lg:w-[35%] rounded-lg px-5">
