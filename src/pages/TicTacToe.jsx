@@ -1,32 +1,95 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import { handleBotMove } from "./BotLogic";
+import { useNetworkContext } from "../NetworkContext";
 
 const TicTacToe = () => {
   const [board, setBoard] = useState(Array(9).fill(null));
-  const [isXNext, setIsXNext] = useState(true);
+  const isXNext = useRef(true);
+  const [myRound, setMyRound] = useState(true);
   const winner = calculateWinner(board);
   const { state } = useLocation();
-  const { clickedEmoji1, clickedEmoji2, easy } = state || {};
+  const { clickedEmoji1, clickedEmoji2, easy, starter } = state || {};
 
   let p1 = `${clickedEmoji1}`;
   let p2 = `${clickedEmoji2}`;
 
+  console.log("outside: ", board);
+
   // Navigation hook
   const navigate = useNavigate();
 
+  const networkContext = useNetworkContext();
+
   // Click handler for square
   const handleClick = (index) => {
+    if(isXNext.current !== starter) return;
+
+    processMove(index)
+    if (networkContext.conn.current) {
+      networkContext.conn.current.send({move: true, index: index});
+    }
+  };
+
+  const processMove = (index) => {
     if (board[index] || winner) {
       return;
     }
-    const newBoard = board.slice();
-    newBoard[index] = isXNext ? p1 : p2;
-    setBoard(newBoard);
-    setIsXNext(!isXNext);
-  };
+    
+    console.log('isXNext: ' + isXNext.current + ' starter: ' + starter);
+    console.log('1. penning down emoji on the board: ' + (isXNext.current ? p1 : p2));
+    
+    /*setBoard(board => {
+      alert('2. penning down emoji on the board: ' + (isXNext.current ? p1 : p2));
+      board[index] = (isXNext.current ? p1 : p2);
+      return board;
+    });
+
+    let newBoard = board.slice();
+    newBoard[index] = isXNext.current ? p1 : p2;
+    setBoard(newBoard);*/
+
+    const currentPlayer = isXNext.current ? p1 : p2;
+    setBoard(board => {
+        const boardCopy = [...board];
+        boardCopy[index] = currentPlayer;
+        return boardCopy;
+    });
+
+    console.log('currentPlayer: ' + currentPlayer + 'starter: ' + starter);
+
+    console.log('board: ' + board);
+
+    isXNext.current = !isXNext.current;
+    setMyRound(oldRound => !oldRound);
+  }
+
+  /*useEffect(() => {
+    console.log('board: ' + board);
+  }, [myRound]);*/
+
+  const receiveMessage = (data) => {
+    if(data.move != null)
+    {
+      processMove(data.index);
+      console.log('Index moved: ' + data.index);
+    }
+  }
+
+  useEffect(() => {
+    networkContext.receiveCallback.current = receiveMessage;
+    setMyRound(starter);
+
+    console.log('Initialization...');
+
+    //initialize
+    console.log('isXNext: ' + isXNext.current + ' starter: ' + starter);
+    p1 = starter? `${clickedEmoji1}`: `${clickedEmoji2}`;
+    p2 = starter? `${clickedEmoji2}`: `${clickedEmoji1}`;
+    console.log('p1: ' + p1 + ' p2: ' + p2);
+  }, []);
 
   // Get game status
   const getStatus = useMemo(() => {
@@ -53,7 +116,8 @@ const TicTacToe = () => {
   // Reset game
   const resetGame = () => {
     setBoard(Array(9).fill(null));
-    setIsXNext(true);
+    isXNext.current = true;
+    setMyRound(true);
   };
 
   // Render square button
@@ -66,8 +130,16 @@ const TicTacToe = () => {
     </button>
   );
 
+  const handleSendMessage = () => {
+    if (networkContext.conn.current && networkContext.conn.current.open) {
+      networkContext.conn.current.send('sending message');
+    } else {
+      alert('Connection is not open');
+    }
+  };
+
   // Effect to handle bot move
-  useEffect(() => {
+  /*useEffect(() => {
     handleBotMove(
       board,
       isXNext,
@@ -95,7 +167,7 @@ const TicTacToe = () => {
     setBoard,
     p1,
     p2,
-  ]);
+  ]);*/
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
@@ -103,7 +175,7 @@ const TicTacToe = () => {
         <div className="relative flex justify-between bg-white my-3 h-16 rounded-md select-none">
           <motion.div
             className="absolute bg-gray-300 h-full w-[50%] rounded-md z-10 top-0"
-            animate={{ translateX: isXNext ? 0 : 215 }}
+            animate={{ translateX: myRound ? 0 : 215 }}
           ></motion.div>
           <div className="text-5xl grow h-16 lg:mt-1 mt-3 z-20">{p1}</div>
           <div className="text-5xl grow h-16 lg:mt-1 mt-3 z-30">{p2}</div>
@@ -123,6 +195,11 @@ const TicTacToe = () => {
             </div>
           ))}
         </div>
+        
+        <div className="flex justify-center my-3">
+          <button onClick={handleSendMessage} className="btn btn-glass text-2xl text-white bg-blue-700">Send Message</button>
+        </div>
+
         <button
           className="btn bg-red-700 text-white text-xl mt-4"
           onClick={resetGame}

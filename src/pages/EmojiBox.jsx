@@ -11,10 +11,30 @@ function EmojiBox({ onEmojiClick }) {
 
     const fetchData = async () => {
       try {
+        /*
         const response = await fetch(
           `https://emoji-api.com/emojis?access_key=${apiKey}`
         );
         const data = await response.json();
+        */
+        const data = [
+          {
+          "slug": "grinning-face",
+          "character": "\ud83d\ude00",
+          "unicodeName": "grinning face",
+          "codePoint": "1F600",
+          "group": "smileys-emotion",
+          "subGroup": "face-smiling"
+          },
+          {
+          "slug": "grinning-face-with-big-eyes",
+          "character": "\ud83d\ude03",
+          "unicodeName": "grinning face with big eyes",
+          "codePoint": "1F603",
+          "group": "smileys-emotion",
+          "subGroup": "face-smiling"
+          }
+        ];
         setEmojiList(data);
       } catch (error) {
         console.error("Error fetching emoji data:", error);

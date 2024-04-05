@@ -5,7 +5,7 @@ import EmojiBox from "./EmojiBox";
 function Selection() {
   const [isOpen1, setIsOpen1] = useState(false);
   const [isOpen2, setIsOpen2] = useState(false);
-  const [clickedEmoji1, setClickedEmoji1] = useState("❓");
+  const [clickedEmoji1, setClickedEmoji1] = useState("🥶");//useState("❓");
   const [errorMessage, setErrorMessage] = useState(null);
   const single = useLocation().state?.single;
   const initialClickedEmoji2 = single ? "🤖" : "❓";
