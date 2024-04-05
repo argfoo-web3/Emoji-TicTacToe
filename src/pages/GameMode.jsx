@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
 import { useNetworkContext } from '../NetworkContext';
+import Modal from 'react-modal';
 
 function GameMode() {
+  Modal.setAppElement('#root');
+
   // Extract state from location
   const { state } = useLocation();
   const { clickedEmoji1, clickedEmoji2 } = state || {};
@@ -13,6 +16,7 @@ function GameMode() {
   const [starter, setStarter] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const [opponentEmoji, setOpponentEmoji] = useState('');
+  const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(myPeerId);
@@ -29,6 +33,10 @@ function GameMode() {
       });
     }
   }, [networkContext.peer]);
+
+  useEffect(() => {
+    setModalIsOpen(isConnected);
+  }, [isConnected]);
 
   // Click handlers for game modes
   const handleClick1 = () => {
@@ -98,11 +106,37 @@ function GameMode() {
     }
   };
 
+  // Define your custom styles for modal
+  const customStyles = {
+    content: {
+      top: '50%',
+      left: '50%',
+      right: 'auto',
+      bottom: 'auto',
+      marginRight: '-50%',
+      transform: 'translate(-50%, -50%)',
+      backgroundColor: '#f4f4f4', // Change this to match your app's background color
+      color: '#333', // Change this to match your app's text color
+      // Add more styles as needed
+    },
+    overlay: {
+      backgroundColor: 'rgba(0, 0, 0, 0.75)', // This is the background color of the overlay
+    },
+  };
+
   return (
     <div className="flex justify-center items-center h-screen">
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={() => setModalIsOpen(false)}
+        contentLabel="Connection Status"
+        style={customStyles}
+      >
+        <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>You are now connected!</h2>
+        <button className="btn btn-glass mx-3 text-2xl w-40 text-white bg-blue-700" onClick={handleClick1}>Start Game</button>
+      </Modal>
       <div className="bg-white w-full lg:w-[35%] rounded-lg px-5">
         {/* Game mode selection */}
-        {isConnected && <div>You are now connected!</div>}
         <div className="text-black font-semibold text-3xl border-gray-200 border-b-2 w-full flex justify-center py-3">
           Select The Game Mode
         </div>
@@ -123,23 +157,20 @@ function GameMode() {
           />
           <button onClick={handleConnect} className="btn btn-glass text-2xl text-white bg-blue-700">Connect</button>
         </div>
-        <div className="flex justify-center my-3">
-          <button onClick={handleSendMessage} className="btn btn-glass text-2xl text-white bg-blue-700">Send Message</button>
-        </div>
-        <div className="flex justify-center my-3">
+        {/*<div className="flex justify-center my-3">
           <button
             onClick={handleClick1}
             className="btn btn-glass mx-3 text-2xl w-40 text-white bg-blue-700"
           >
             Easy
           </button>
-          {/*<button
+          <button
             onClick={handleClick2}
             className="btn btn-glass mx-3 text-2xl w-40 text-white bg-black"
           >
             Hard
-          </button>*/}
-        </div>
+          </button>
+        </div>*/}
       </div>
     </div>
   );

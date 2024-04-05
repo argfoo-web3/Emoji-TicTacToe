@@ -7,24 +7,27 @@ import { useNetworkContext } from "../NetworkContext";
 const TicTacToe = () => {
   const [board, setBoard] = useState(Array(9).fill(null));
   const isXNext = useRef(true);
-  const [myRound, setMyRound] = useState(true);
   const winner = calculateWinner(board);
   const { state } = useLocation();
   const { clickedEmoji1, clickedEmoji2, easy, starter } = state || {};
   let p1 = starter? `${clickedEmoji1}`: `${clickedEmoji2}`;
   let p2 = starter? `${clickedEmoji2}`: `${clickedEmoji1}`;
+  const [myRound, setMyRound] = useState(starter);
+
   // Navigation hook
   const navigate = useNavigate();
   const networkContext = useNetworkContext();
+
   // Click handler for square
   const handleClick = (index) => {
     if(isXNext.current !== starter) return;
     processMove(index);
-    setMyRound(!starter);
+    //setMyRound(!starter);
     if (networkContext.conn.current) {
       networkContext.conn.current.send({move: true, index: index});
     }
   };
+
   const processMove = (index) => {
     if (board[index] || winner) {
       return;
@@ -36,14 +39,16 @@ const TicTacToe = () => {
         return boardCopy;
     });
     isXNext.current = !isXNext.current;
+    setMyRound(round => !round);
   }
+
   const receiveMessage = (data) => {
     if(data.move != null)
     {
-      setMyRound(starter);
       processMove(data.index);
     }
   }
+
   useEffect(() => {
     networkContext.receiveCallback.current = receiveMessage;
     //initialize
@@ -62,6 +67,7 @@ const TicTacToe = () => {
       return "It's a draw!";
     }
   }, [board, winner]);
+
   // Effect to navigate to end screen when game ends
   useEffect(() => {
     if (winner || !board.includes(null)) {
@@ -70,12 +76,14 @@ const TicTacToe = () => {
       });
     }
   }, [getStatus, winner, board, navigate, clickedEmoji1, clickedEmoji2, easy]);
+
   // Reset game
   const resetGame = () => {
     setBoard(Array(9).fill(null));
     isXNext.current = true;
-    setMyRound(true);
+    setMyRound(starter);
   };
+
   // Render square button
   const renderSquare = (index) => (
     <button
@@ -85,6 +93,7 @@ const TicTacToe = () => {
       {board[index]}
     </button>
   );
+
   const handleSendMessage = () => {
     if (networkContext.conn.current && networkContext.conn.current.open) {
       networkContext.conn.current.send('sending message');
@@ -130,8 +139,8 @@ const TicTacToe = () => {
             className="absolute bg-gray-300 h-full w-[50%] rounded-md z-10 top-0"
             animate={{ translateX: myRound ? 0 : 215 }}
           ></motion.div>
-          <div className="text-5xl grow h-16 lg:mt-1 mt-3 z-20">{p1}</div>
-          <div className="text-5xl grow h-16 lg:mt-1 mt-3 z-30">{p2}</div>
+          <div className="text-5xl grow h-16 lg:mt-1 mt-3 z-20">{clickedEmoji1}</div>
+          <div className="text-5xl grow h-16 lg:mt-1 mt-3 z-30">{clickedEmoji2}</div>
         </div>
         <div className="grid grid-cols-3 gap-2 bg-white p-3 rounded-md">
           {[0, 1, 2].map((row) => (
@@ -160,6 +169,7 @@ const TicTacToe = () => {
     </div>
   );
 };
+
 // Function to calculate winner
 const calculateWinner = (squares) => {
   const lines = [
@@ -179,4 +189,5 @@ const calculateWinner = (squares) => {
   }
   return null;
 };
+
 export default TicTacToe;
