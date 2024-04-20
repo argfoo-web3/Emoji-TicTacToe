@@ -38,6 +38,11 @@ const TicTacToe = () => {
     }
     const currentPlayer = isXNext.current ? p1 : p2;
     */
+   if(wasm == null)
+   {
+    alert('wasm is still null!');
+    return;
+   }
     wasm.move(index, isXNext.current? 1: 2);
     setBoard(board => {
       const boardCopy = [...board];
@@ -57,7 +62,6 @@ const TicTacToe = () => {
   }
 
   useEffect(() => {
-    networkContext.receiveCallback.current = receiveMessage;
     //initialize
     p1 = starter? `${clickedEmoji1}`: `${clickedEmoji2}`;
     p2 = starter? `${clickedEmoji2}`: `${clickedEmoji1}`;
@@ -76,11 +80,13 @@ const TicTacToe = () => {
     // Loop through newBoard and set board value according to getBoard
     newBoard = newBoard.map((value, index) => wasm.getBoard(index));
     setBoard(newBoard);
+    // Only start listening to messages when wasm is set
+    networkContext.receiveCallback.current = receiveMessage;
   }, [wasm]);
 
   // Get game status
   const getStatus = useMemo(() => {
-    if (winner) {
+    if (winner !== 0) {
       if (winner === "🤖") {
         return `lol, ${winner} Won!`;
       } else {
@@ -99,7 +105,7 @@ const TicTacToe = () => {
     winner = wasm.check_winner();
     if (winner != 0 || !board.includes(0)) {
       navigate("/end", {
-        state: { getStatus, winner: (winner ? p1 : p2), clickedEmoji1, clickedEmoji2, easy },
+        state: { getStatus: getStatus, winner: (winner === 0? 0: (winner ? p1 : p2)), clickedEmoji1, clickedEmoji2, easy },
       });
     }
   }, [getStatus, winner, board, navigate, clickedEmoji1, clickedEmoji2, easy]);

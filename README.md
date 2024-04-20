@@ -27,11 +27,13 @@
 
 ## 🚀 Getting Started
 
+1. **Install PeerJS Server globally**: `npm install peer -g`
+1. **Run the PeerJS Server** `peerjs --port 9001 --key peerjs --path /server`
 1. **Clone the Repository**: `git clone https://github.com/MishanPoudel/Emoji-TicTacToe.git`
-2. **Navigate to the Directory**: `cd emoji-tictactoe`
-3. **Install Dependencies**: `npm install`
-4. **Start the Development Server**: `npm start`
-5. **Open Your Browser**: Visit `http://localhost:3000` and enjoy playing Emoji TicTacToe!
+1. **Navigate to the Directory**: `cd emoji-tictactoe`
+1. **Install Dependencies**: `npm install`
+1. **Start the Development Server**: `PORT=<your desired port> npm start`
+1. **Open Your Browser**: Visit `http://localhost:3000` and enjoy playing Emoji TicTacToe!
 
 ## 🎯 How to Play
 
