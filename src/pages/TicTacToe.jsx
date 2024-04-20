@@ -4,15 +4,19 @@ import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import { handleBotMove } from "./BotLogic";
 import { useNetworkContext } from "../NetworkContext";
+import tictactoe from "../game_logic/tictactoe.js";
+
 const TicTacToe = () => {
   const [board, setBoard] = useState(Array(9).fill(null));
   const isXNext = useRef(true);
-  const winner = calculateWinner(board);
+  //const winner = calculateWinner(board);
+  let winner = 0;
   const { state } = useLocation();
   const { clickedEmoji1, clickedEmoji2, easy, starter } = state || {};
   let p1 = starter? `${clickedEmoji1}`: `${clickedEmoji2}`;
   let p2 = starter? `${clickedEmoji2}`: `${clickedEmoji1}`;
   const [myRound, setMyRound] = useState(starter);
+  const [wasm, setWasm] = useState(null);
 
   // Navigation hook
   const navigate = useNavigate();
@@ -29,14 +33,17 @@ const TicTacToe = () => {
   };
 
   const processMove = (index) => {
-    if (board[index] || winner) {
+    /*if (board[index] || winner) {
       return;
     }
     const currentPlayer = isXNext.current ? p1 : p2;
+    */
+    wasm.move(index, isXNext.current? 1: 2);
     setBoard(board => {
-        const boardCopy = [...board];
-        boardCopy[index] = currentPlayer;
-        return boardCopy;
+      const boardCopy = [...board];
+      //boardCopy[index] = currentPlayer;
+      boardCopy[index] = wasm.getBoard(index);
+      return boardCopy;
     });
     isXNext.current = !isXNext.current;
     setMyRound(round => !round);
@@ -54,7 +61,23 @@ const TicTacToe = () => {
     //initialize
     p1 = starter? `${clickedEmoji1}`: `${clickedEmoji2}`;
     p2 = starter? `${clickedEmoji2}`: `${clickedEmoji1}`;
+
+    tictactoe().then(exports => {
+      setWasm(exports);
+    });
   }, []);
+
+  useEffect(() => {
+    if(wasm == null)
+    {
+      return;
+    }
+    var newBoard = Array(9).fill(null);
+    // Loop through newBoard and set board value according to getBoard
+    newBoard = newBoard.map((value, index) => wasm.getBoard(index));
+    setBoard(newBoard);
+  }, [wasm]);
+
   // Get game status
   const getStatus = useMemo(() => {
     if (winner) {
@@ -63,23 +86,27 @@ const TicTacToe = () => {
       } else {
         return `Congrats, ${winner} Won!`;
       }
-    } else if (!board.includes(null)) {
+    } else if (!board.includes(0)) {
       return "It's a draw!";
     }
   }, [board, winner]);
 
   // Effect to navigate to end screen when game ends
   useEffect(() => {
-    if (winner || !board.includes(null)) {
+    if(wasm == null) {
+      return;
+    }
+    winner = wasm.check_winner();
+    if (winner != 0 || !board.includes(0)) {
       navigate("/end", {
-        state: { getStatus, winner, clickedEmoji1, clickedEmoji2, easy },
+        state: { getStatus, winner: (winner ? p1 : p2), clickedEmoji1, clickedEmoji2, easy },
       });
     }
   }, [getStatus, winner, board, navigate, clickedEmoji1, clickedEmoji2, easy]);
 
   // Reset game
   const resetGame = () => {
-    setBoard(Array(9).fill(null));
+    setBoard(Array(9).fill(0));
     isXNext.current = true;
     setMyRound(starter);
   };
@@ -90,7 +117,9 @@ const TicTacToe = () => {
       className="h-32 w-32 flex items-center justify-center text-4xl"
       onClick={() => handleClick(index)}
     >
-      {board[index]}
+      {
+        board[index] === 0? null: ((board[index] === 1? p1: p2))
+      }
     </button>
   );
 
