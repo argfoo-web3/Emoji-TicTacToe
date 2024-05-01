@@ -86,6 +86,10 @@ const TicTacToe = () => {
 
   // Get game status
   const getStatus = useMemo(() => {
+    if(wasm == null) {
+      return;
+    }
+    winner = wasm?.check_winner();
     if (winner !== 0) {
       if (winner === "🤖") {
         return `lol, ${winner} Won!`;

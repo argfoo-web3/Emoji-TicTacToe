@@ -10,7 +10,7 @@ export default function End() {
     <div className="flex justify-center items-center h-screen">
       <div className="bg-white w-full lg:w-[35%] rounded-lg py-3 px-5">
         <div className="text-7xl w-full flex justify-center py-2">
-          {getStatus.includes("Congrats") || getStatus.includes("lol")
+          {getStatus?.includes("Congrats") || getStatus?.includes("lol")
             ? "🏆"
             : "🟰"}
         </div>
